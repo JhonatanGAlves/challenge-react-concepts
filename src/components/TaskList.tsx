@@ -12,18 +12,41 @@ interface Task {
 
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskTitle, setNewTaskTitle] = useState('')
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if (!newTaskTitle) return
+
+    const newTask = {
+      id: Math.random(),
+      title: newTaskTitle,
+      isComplete: false
+    }
+    // oldState é o mesmo que o estado task. ...oldState está pegando o conteúdo todo do array e concatenando com newTask
+    setTasks(oldState => [...oldState, newTask])
+    // Sempre que add uma nova task, o input será resetado.
+    setNewTaskTitle('')
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    // Para cada task.id igual a ele mesmo, é feito um ternario onde retorna um objeto com tudo dentro de task e altera somente o valor de isComplete
+    // passando um valor diferente dele mesmo. E se não for igual, renderiza todo o conteúdo de task.
+    const taskIsChecked = tasks.map(task => task.id === id ? {
+      ...task,
+      isComplete: !task.isComplete
+    } : task)
+
+    setTasks(taskIsChecked)
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    // Está fazendo um filtro em tasks e para cada task.id que ele encontrar diferente do id da task que foi removido, ele renderiza novamente a lista.
+    const filteredTask = tasks.filter(task => task.id !== id)
+
+    setTasks(filteredTask)
   }
 
   return (
@@ -32,14 +55,14 @@ export function TaskList() {
         <h2>Minhas tasks</h2>
 
         <div className="input-group">
-          <input 
-            type="text" 
-            placeholder="Adicionar novo todo" 
+          <input
+            type="text"
+            placeholder="Adicionar novo todo"
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
           />
           <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
-            <FiCheckSquare size={16} color="#fff"/>
+            <FiCheckSquare size={16} color="#fff" />
           </button>
         </div>
       </header>
@@ -50,7 +73,7 @@ export function TaskList() {
             <li key={task.id}>
               <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
                 <label className="checkbox-container">
-                  <input 
+                  <input
                     type="checkbox"
                     readOnly
                     checked={task.isComplete}
@@ -62,11 +85,11 @@ export function TaskList() {
               </div>
 
               <button type="button" data-testid="remove-task-button" onClick={() => handleRemoveTask(task.id)}>
-                <FiTrash size={16}/>
+                <FiTrash size={16} />
               </button>
             </li>
           ))}
-          
+
         </ul>
       </main>
     </section>
